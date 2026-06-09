@@ -1,202 +1,200 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" href="favicon.png">
   <title>Register - Transport Co.</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap');
     :root {
       --primary: #2563eb;
-      --primary-light: #2d5a87;
-      --secondary: #1d4ed8;
-      --accent: #f59e0b;
-      --glass: rgba(255, 255, 255, 0.1);
-      --glass-border: rgba(255, 255, 255, 0.2);
-      --bg-overlay: rgba(255, 255, 255, 0.9);
-      --text-color: #1a1a1a;
-      --header-bg: rgba(255, 255, 255, 0.9);
-      --header-scrolled-bg: rgba(255, 255, 255, 0.95);
-      --nav-color: rgba(0, 0, 0, 0.7);
-      --nav-hover: #000000;
-      --search-bg: rgba(0, 0, 0, 0.05);
-      --search-border: rgba(0, 0, 0, 0.1);
       --btn-bg: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
       --btn-shadow: rgba(29, 78, 216, 0.4);
+      --glass-border: rgba(255, 255, 255, 0.2);
+      --bg-overlay: rgba(255, 255, 255, 0.92);
+      --text-color: #1a1a1a;
       --border-color: rgba(0, 0, 0, 0.1);
     }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: 'Inter', sans-serif;
       background: linear-gradient(var(--bg-overlay), var(--bg-overlay)),
         url('https://images.pexels.com/photos/1637438/pexels-photo-1637438.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2');
       background-size: cover;
       background-position: center;
-      height: 100vh;
+      min-height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
       color: var(--text-color);
+      padding: 20px;
     }
-
     .auth-container {
-      width: 360px;
+      width: 100%;
+      max-width: 380px;
       padding: 40px;
-      border-radius: 8px;
+      border-radius: 12px;
       background: var(--bg-overlay);
       backdrop-filter: blur(10px);
-      box-shadow: 0 4px 25px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 4px 25px rgba(0,0,0,0.2);
       border: 1px solid var(--glass-border);
     }
-
-    /* responsive tweaks */
-    @media (max-width: 480px) {
-      .auth-container {
-        width: 100%;
-        padding: 30px 20px;
-      }
-      .auth-container h2 {
-        font-size: 20px;
-      }
-    }
-
     .auth-container h2 {
       text-align: center;
       margin-bottom: 24px;
-      font-size: 24px;
+      font-size: 22px;
       color: var(--text-color);
     }
-
     .auth-container label {
       display: block;
-      margin-bottom: 16px;
+      margin-bottom: 14px;
       font-weight: 600;
       font-size: 14px;
       color: var(--text-color);
     }
-
     .auth-container input {
       width: 100%;
       padding: 12px;
       border: 1px solid var(--border-color);
-      border-radius: 4px;
-      margin-top: 6px;
-      font-size: 15px;
-      background: rgba(255, 255, 255, 0.7);
+      border-radius: 6px;
+      margin-top: 5px;
+      font-size: 14px;
+      background: rgba(255,255,255,0.8);
       color: #000;
+      transition: border-color 0.2s;
     }
-
-    .auth-container input::placeholder {
-      color: rgba(0, 0, 0, 0.5);
-    }
-
+    .auth-container input:focus { outline: none; border-color: var(--primary); }
     .auth-container button {
       width: 100%;
-      padding: 14px;
-      margin-top: 20px;
+      padding: 13px;
+      margin-top: 18px;
       border: none;
-      border-radius: 4px;
+      border-radius: 6px;
       background: var(--btn-bg);
       color: #fff;
-      font-size: 16px;
-      font-weight: bold;
+      font-size: 15px;
+      font-weight: 700;
       cursor: pointer;
-      transition: filter 0.3s ease;
       box-shadow: 0 4px 15px var(--btn-shadow);
+      transition: filter 0.2s, transform 0.2s;
+    }
+    .auth-container button:hover { filter: brightness(0.92); transform: translateY(-1px); }
+    .auth-container p { margin-top: 16px; text-align: center; font-size: 14px; color: var(--text-color); }
+    .auth-container a { color: var(--primary); text-decoration: none; }
+    .auth-container a:hover { text-decoration: underline; }
+
+    /* ---- Password strength ---- */
+    .strength-wrap { margin: -8px 0 12px; }
+    .strength-track {
+      height: 4px;
+      border-radius: 4px;
+      background: #e5e7eb;
+      overflow: hidden;
+    }
+    .strength-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: 4px;
+      transition: width 0.35s ease, background 0.35s ease;
+    }
+    .strength-label {
+      font-size: 11px;
+      font-weight: 600;
+      margin-top: 4px;
+      min-height: 16px;
     }
 
-    .auth-container p {
-      margin-top: 18px;
-      text-align: center;
-      font-size: 14px;
-      color: var(--text-color);
-    }
-
-    .auth-container a {
-      color: var(--primary);
-      text-decoration: none;
-    }
-
-    .auth-container a:hover {
-      text-decoration: underline;
-    }
+    #error-msg { color: #ef4444; text-align: center; margin-top: 8px; font-size: 13px; }
   </style>
 </head>
-
 <body>
   <div class="auth-container">
     <form id="register-form">
-      <h2>Sign Up at Transport Co.</h2>
-      <label>Name
-        <input type="text" name="name" id="name" placeholder="Your full name" required>
+      <h2>Sign Up at MooVit</h2>
+
+      <label>Full Name
+        <input type="text" id="name" placeholder="Your full name" required>
       </label>
+
       <label>Email
-        <input type="email" name="email" id="email" placeholder="you@example.com" required>
+        <input type="email" id="email" placeholder="you@example.com" required>
       </label>
+
       <label>Password
-        <input id="pwd" type="password" placeholder="Create password" required>
+        <input type="password" id="pwd" placeholder="Create password" required oninput="checkStrength(this.value)">
       </label>
+      <div class="strength-wrap">
+        <div class="strength-track"><div class="strength-fill" id="strength-fill"></div></div>
+        <div class="strength-label" id="strength-label"></div>
+      </div>
+
       <label>Confirm Password
-        <input id="cpwd" type="password" placeholder="Confirm password" required>
+        <input type="password" id="cpwd" placeholder="Confirm password" required>
       </label>
-      <div id="error-msg" style="color: #ffb3b3; text-align:center; margin-top:10px;"></div>
-      <button type="submit">Register</button>
+
+      <div id="error-msg"></div>
+      <button type="submit">Create Account</button>
       <p>Already have an account? <a href="login.html">Login</a></p>
     </form>
   </div>
+
   <script>
-    document.getElementById('register-form').addEventListener('submit', function (e) {
+    function checkStrength(val) {
+      const fill  = document.getElementById('strength-fill');
+      const label = document.getElementById('strength-label');
+      let score = 0;
+      if (val.length >= 8)            score++;
+      if (/[A-Z]/.test(val))          score++;
+      if (/[0-9]/.test(val))          score++;
+      if (/[^A-Za-z0-9]/.test(val))   score++;
+      const levels = [
+        { w: '0%',   c: 'transparent', t: '' },
+        { w: '25%',  c: '#ef4444',     t: '🔴 Weak' },
+        { w: '50%',  c: '#f97316',     t: '🟠 Fair' },
+        { w: '75%',  c: '#eab308',     t: '🟡 Good' },
+        { w: '100%', c: '#22c55e',     t: '🟢 Strong' },
+      ];
+      fill.style.width      = levels[score].w;
+      fill.style.background = levels[score].c;
+      label.textContent     = levels[score].t;
+      label.style.color     = levels[score].c;
+    }
+
+    document.getElementById('register-form').addEventListener('submit', function(e) {
       e.preventDefault();
-      const name = document.getElementById('name').value.trim();
-      const email = document.getElementById('email').value.trim();
-      const password = document.getElementById('pwd').value;
+      const name            = document.getElementById('name').value.trim();
+      const email           = document.getElementById('email').value.trim();
+      const password        = document.getElementById('pwd').value;
       const confirmPassword = document.getElementById('cpwd').value;
-      const errorMsg = document.getElementById('error-msg');
-      errorMsg.textContent = '';
+      const errorMsg        = document.getElementById('error-msg');
+      errorMsg.textContent  = '';
 
-
-      // Check for empty fields
       if (!name || !email || !password || !confirmPassword) {
-        errorMsg.textContent = 'Please fill in all fields.';
-        return;
+        errorMsg.textContent = 'Please fill in all fields.'; return;
       }
-
-      // Name validation (only alphabets and spaces)
-      const namePattern = /^[A-Za-z ]+$/;
-      if (!namePattern.test(name)) {
-        errorMsg.textContent = 'Name should contain only alphabets and spaces.';
-        return;
+      if (!/^[A-Za-z ]+$/.test(name)) {
+        errorMsg.textContent = 'Name should only contain letters and spaces.'; return;
       }
-
-      // Email validation
-      const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailPattern.test(email)) {
-        errorMsg.textContent = 'Please enter a valid email address.';
-        return;
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        errorMsg.textContent = 'Please enter a valid email address.'; return;
       }
-
-      // Password strength validation
-      // Minimum 8 characters, at least one uppercase, one lowercase, one digit, and one special character
-      const strongPasswordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{8,}$/;
-      if (!strongPasswordPattern.test(password)) {
-        errorMsg.textContent = 'Password must be at least 8 characters and include uppercase, lowercase, number, and special character.';
-        return;
+      if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>/?]).{8,}$/.test(password)) {
+        errorMsg.textContent = 'Password must be 8+ chars with uppercase, lowercase, number & special character.'; return;
       }
-
-      // Confirm password match
       if (password !== confirmPassword) {
-        errorMsg.textContent = 'Passwords do not match.';
-        return;
+        errorMsg.textContent = 'Passwords do not match.'; return;
       }
 
-      // If all validations pass, redirect
+      // Save user to localStorage
+      const users = JSON.parse(localStorage.getItem('moovit_users') || '[]');
+      if (users.find(u => u.email === email)) {
+        errorMsg.textContent = 'An account with this email already exists.'; return;
+      }
+      users.push({ name, email, password, joined: new Date().toLocaleDateString() });
+      localStorage.setItem('moovit_users', JSON.stringify(users));
       window.location.href = 'login.html';
     });
   </script>
 </body>
-
 </html>

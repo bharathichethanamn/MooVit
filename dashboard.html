@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - MooVit</title>
+  <link rel="icon" href="favicon.png">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --bg: #f1f5f9;
+      --sidebar-bg: #0f172a;
+      --card: #ffffff;
+      --text: #1e293b;
+      --muted: #64748b;
+      --border: #e2e8f0;
+    }
+
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); display: flex; min-height: 100vh; }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width: 240px; min-height: 100vh; background: var(--sidebar-bg);
+      display: flex; flex-direction: column; position: fixed; top: 0; left: 0; z-index: 100;
+    }
+    .sidebar-brand {
+      padding: 24px 20px 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      font-size: 20px; font-weight: 800; color: #fff; letter-spacing: -0.5px;
+    }
+    .sidebar-brand span { color: #3b82f6; }
+    .sidebar-nav { padding: 16px 0; flex: 1; }
+    .nav-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 20px; color: rgba(255,255,255,0.6);
+      cursor: pointer; font-size: 14px; font-weight: 500;
+      transition: all 0.2s; border-left: 3px solid transparent;
+      text-decoration: none;
+    }
+    .nav-item:hover { color: #fff; background: rgba(255,255,255,0.05); }
+    .nav-item.active { color: #fff; border-left-color: #3b82f6; background: rgba(59,130,246,0.1); }
+    .nav-icon { font-size: 18px; width: 22px; text-align: center; }
+    .sidebar-footer {
+      padding: 16px 20px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+    .user-pill {
+      display: flex; align-items: center; gap: 10px;
+      background: rgba(255,255,255,0.06); border-radius: 10px; padding: 10px 12px;
+    }
+    .user-avatar {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 14px; color: #fff; flex-shrink: 0;
+    }
+    .user-name { font-size: 13px; font-weight: 600; color: #fff; }
+    .user-email { font-size: 11px; color: rgba(255,255,255,0.4); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 140px; }
+    .logout-btn {
+      width: 100%; margin-top: 10px; padding: 8px;
+      background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3);
+      color: #f87171; border-radius: 8px; font-size: 13px; font-weight: 600;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .logout-btn:hover { background: rgba(239,68,68,0.25); }
+
+    /* ── MAIN ── */
+    .main { margin-left: 240px; flex: 1; padding: 32px; }
+
+    .topbar {
+      display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px;
+    }
+    .topbar h1 { font-size: 22px; font-weight: 700; }
+    .topbar-date { font-size: 13px; color: var(--muted); }
+
+    /* ── STATS ── */
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 28px; }
+    .stat-card {
+      background: var(--card); border-radius: 14px; padding: 20px 22px;
+      border: 1px solid var(--border); display: flex; align-items: center; gap: 16px;
+    }
+    .stat-icon {
+      width: 46px; height: 46px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0;
+    }
+    .stat-icon.blue   { background: #dbeafe; }
+    .stat-icon.green  { background: #d1fae5; }
+    .stat-icon.yellow { background: #fef3c7; }
+    .stat-icon.red    { background: #fee2e2; }
+    .stat-val { font-size: 26px; font-weight: 700; line-height: 1; }
+    .stat-lbl { font-size: 12px; color: var(--muted); margin-top: 3px; }
+
+    /* ── TABS ── */
+    .tabs { display: flex; gap: 4px; margin-bottom: 20px; background: var(--card); border-radius: 10px; padding: 5px; border: 1px solid var(--border); width: fit-content; }
+    .tab-btn {
+      padding: 8px 20px; border-radius: 7px; border: none; background: transparent;
+      font-size: 13px; font-weight: 600; color: var(--muted); cursor: pointer; transition: all 0.2s;
+    }
+    .tab-btn.active { background: var(--primary); color: #fff; }
+
+    /* ── PANEL ── */
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    /* ── SHIPMENT TABLE ── */
+    .card { background: var(--card); border-radius: 14px; border: 1px solid var(--border); overflow: hidden; }
+    .card-header { padding: 18px 22px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+    .card-title { font-size: 15px; font-weight: 700; }
+    table { width: 100%; border-collapse: collapse; }
+    th { padding: 12px 16px; text-align: left; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); background: #f8fafc; }
+    td { padding: 14px 16px; font-size: 13px; border-top: 1px solid var(--border); }
+    tr:hover td { background: #f8fafc; }
+    .badge {
+      display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600;
+    }
+    .badge-transit  { background: #dbeafe; color: #1e40af; }
+    .badge-delivered{ background: #d1fae5; color: #065f46; }
+    .badge-pending  { background: #fef3c7; color: #92400e; }
+
+    /* ── BOOK FORM ── */
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 22px; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group.full { grid-column: 1 / -1; }
+    .form-group label { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px;
+      font-size: 14px; font-family: 'Inter', sans-serif; background: #f8fafc;
+      transition: border-color 0.2s; color: var(--text);
+    }
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus { outline: none; border-color: var(--primary); background: #fff; }
+    .form-group textarea { resize: vertical; min-height: 80px; }
+    .form-footer { padding: 0 22px 22px; }
+    .btn-submit {
+      padding: 12px 32px; background: var(--primary); color: #fff;
+      border: none; border-radius: 8px; font-size: 14px; font-weight: 700;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .btn-submit:hover { background: var(--primary-dark); transform: translateY(-1px); }
+
+    /* ── PROFILE ── */
+    .profile-grid { display: grid; grid-template-columns: 280px 1fr; gap: 20px; }
+    .profile-card { background: var(--card); border-radius: 14px; border: 1px solid var(--border); padding: 28px; text-align: center; }
+    .profile-avatar-lg {
+      width: 80px; height: 80px; border-radius: 50%;
+      background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 32px; font-weight: 700; color: #fff; margin: 0 auto 14px;
+    }
+    .profile-name { font-size: 18px; font-weight: 700; }
+    .profile-email { font-size: 13px; color: var(--muted); margin-top: 4px; }
+    .profile-joined { font-size: 12px; color: var(--muted); margin-top: 8px; }
+    .profile-info { background: var(--card); border-radius: 14px; border: 1px solid var(--border); padding: 24px; }
+    .info-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
+    .info-row:last-child { border-bottom: none; }
+    .info-lbl { font-weight: 600; color: var(--muted); }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed; bottom: 28px; right: 28px; background: #1e293b; color: #fff;
+      padding: 14px 22px; border-radius: 10px; font-size: 14px; font-weight: 500;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.2); transform: translateY(80px); opacity: 0;
+      transition: all 0.35s ease; z-index: 9999;
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+
+    /* ── EMPTY STATE ── */
+    .empty { text-align: center; padding: 48px; color: var(--muted); }
+    .empty-icon { font-size: 48px; margin-bottom: 12px; }
+    .empty p { font-size: 14px; }
+
+    @media (max-width: 1024px) {
+      .stats-grid { grid-template-columns: repeat(2,1fr); }
+      .profile-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 768px) {
+      .sidebar { width: 60px; }
+      .sidebar-brand, .nav-label, .user-name, .user-email, .logout-btn { display: none; }
+      .main { margin-left: 60px; padding: 16px; }
+      .stats-grid { grid-template-columns: repeat(2,1fr); }
+      .form-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-brand">Moo<span>Vit</span></div>
+  <nav class="sidebar-nav">
+    <a class="nav-item active" onclick="showTab('overview')">
+      <span class="nav-icon">📊</span><span class="nav-label">Overview</span>
+    </a>
+    <a class="nav-item" onclick="showTab('shipments')">
+      <span class="nav-icon">📦</span><span class="nav-label">My Shipments</span>
+    </a>
+    <a class="nav-item" onclick="showTab('book')">
+      <span class="nav-icon">➕</span><span class="nav-label">Book Shipment</span>
+    </a>
+    <a class="nav-item" onclick="showTab('profile')">
+      <span class="nav-icon">👤</span><span class="nav-label">Profile</span>
+    </a>
+    <a class="nav-item" href="tracking-dashboard.html">
+      <span class="nav-icon">📍</span><span class="nav-label">Live Tracking</span>
+    </a>
+    <a class="nav-item" href="index.html">
+      <span class="nav-icon">🏠</span><span class="nav-label">Home</span>
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-pill">
+      <div class="user-avatar" id="sidebarAvatar">G</div>
+      <div>
+        <div class="user-name" id="sidebarName">Guest</div>
+        <div class="user-email" id="sidebarEmail">guest@moovit.com</div>
+      </div>
+    </div>
+    <button class="logout-btn" onclick="logout()">🚪 Logout</button>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <div class="topbar">
+    <div>
+      <h1 id="welcomeMsg">Welcome back 👋</h1>
+      <div class="topbar-date" id="topbarDate"></div>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon blue">📦</div>
+      <div><div class="stat-val" id="statTotal">0</div><div class="stat-lbl">Total Shipments</div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon yellow">🚚</div>
+      <div><div class="stat-val" id="statTransit">0</div><div class="stat-lbl">In Transit</div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon green">✅</div>
+      <div><div class="stat-val" id="statDelivered">0</div><div class="stat-lbl">Delivered</div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon red">⏳</div>
+      <div><div class="stat-val" id="statPending">0</div><div class="stat-lbl">Pending</div></div>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab-btn active" id="tab-overview"  onclick="showTab('overview')">Overview</button>
+    <button class="tab-btn"        id="tab-shipments" onclick="showTab('shipments')">My Shipments</button>
+    <button class="tab-btn"        id="tab-book"      onclick="showTab('book')">Book Shipment</button>
+    <button class="tab-btn"        id="tab-profile"   onclick="showTab('profile')">Profile</button>
+  </div>
+
+  <!-- OVERVIEW PANEL -->
+  <div class="panel active" id="panel-overview">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Recent Shipments</div>
+        <button class="tab-btn active" style="padding:6px 14px;font-size:12px;" onclick="showTab('shipments')">View All</button>
+      </div>
+      <div id="recentShipmentsTable"></div>
+    </div>
+  </div>
+
+  <!-- SHIPMENTS PANEL -->
+  <div class="panel" id="panel-shipments">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">All Shipments</div>
+      </div>
+      <div id="allShipmentsTable"></div>
+    </div>
+  </div>
+
+  <!-- BOOK PANEL -->
+  <div class="panel" id="panel-book">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">📦 Book a New Shipment</div>
+      </div>
+      <form id="bookForm" onsubmit="bookShipment(event)">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Sender Name</label>
+            <input type="text" id="senderName" placeholder="Full name" required>
+          </div>
+          <div class="form-group">
+            <label>Sender Phone</label>
+            <input type="tel" id="senderPhone" placeholder="+91 XXXXX XXXXX" required>
+          </div>
+          <div class="form-group">
+            <label>Pickup City</label>
+            <input type="text" id="pickupCity" placeholder="e.g. Mumbai" required>
+          </div>
+          <div class="form-group">
+            <label>Pickup Address</label>
+            <input type="text" id="pickupAddress" placeholder="Street address" required>
+          </div>
+          <div class="form-group">
+            <label>Receiver Name</label>
+            <input type="text" id="receiverName" placeholder="Full name" required>
+          </div>
+          <div class="form-group">
+            <label>Receiver Phone</label>
+            <input type="tel" id="receiverPhone" placeholder="+91 XXXXX XXXXX" required>
+          </div>
+          <div class="form-group">
+            <label>Delivery City</label>
+            <input type="text" id="deliveryCity" placeholder="e.g. Delhi" required>
+          </div>
+          <div class="form-group">
+            <label>Delivery Address</label>
+            <input type="text" id="deliveryAddress" placeholder="Street address" required>
+          </div>
+          <div class="form-group">
+            <label>Cargo Type</label>
+            <select id="cargoType" required>
+              <option value="">Select type</option>
+              <option>Electronics</option>
+              <option>Documents</option>
+              <option>Perishable Goods</option>
+              <option>Machinery</option>
+              <option>Clothing & Textiles</option>
+              <option>Furniture</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Weight (kg)</label>
+            <input type="number" id="weight" placeholder="e.g. 25" min="0.1" step="0.1" required>
+          </div>
+          <div class="form-group">
+            <label>Service Type</label>
+            <select id="serviceType" required>
+              <option value="">Select service</option>
+              <option>Standard Ground</option>
+              <option>Express Delivery</option>
+              <option>Air Freight</option>
+              <option>Ocean Freight</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Preferred Pickup Date</label>
+            <input type="date" id="pickupDate" required>
+          </div>
+          <div class="form-group full">
+            <label>Special Instructions</label>
+            <textarea id="instructions" placeholder="Fragile, keep dry, temperature sensitive, etc."></textarea>
+          </div>
+        </div>
+        <div class="form-footer">
+          <button type="submit" class="btn-submit">🚀 Confirm Booking</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- PROFILE PANEL -->
+  <div class="panel" id="panel-profile">
+    <div class="profile-grid">
+      <div class="profile-card">
+        <div class="profile-avatar-lg" id="profileAvatarLg">G</div>
+        <div class="profile-name" id="profileName">Guest</div>
+        <div class="profile-email" id="profileEmail">guest@moovit.com</div>
+        <div class="profile-joined" id="profileJoined">Member since —</div>
+      </div>
+      <div class="profile-info">
+        <div class="card-header" style="padding:0 0 14px; margin-bottom:4px;">
+          <div class="card-title">Account Details</div>
+        </div>
+        <div class="info-row"><span class="info-lbl">Full Name</span><span id="piName">—</span></div>
+        <div class="info-row"><span class="info-lbl">Email</span><span id="piEmail">—</span></div>
+        <div class="info-row"><span class="info-lbl">Member Since</span><span id="piJoined">—</span></div>
+        <div class="info-row"><span class="info-lbl">Total Shipments</span><span id="piShipments">0</span></div>
+        <div class="info-row"><span class="info-lbl">Account Type</span><span>Standard User</span></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+  // ── Session ──
+  const session = JSON.parse(localStorage.getItem('moovit_session') || 'null');
+  if (!session) { window.location.href = 'login.html'; }
+
+  const name  = session?.name  || 'Guest';
+  const email = session?.email || '';
+  const initials = name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2);
+
+  document.getElementById('sidebarAvatar').textContent  = initials;
+  document.getElementById('sidebarName').textContent    = name;
+  document.getElementById('sidebarEmail').textContent   = email;
+  document.getElementById('welcomeMsg').textContent     = `Welcome back, ${name.split(' ')[0]} 👋`;
+  document.getElementById('topbarDate').textContent     = new Date().toLocaleDateString('en-IN', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+
+  document.getElementById('profileAvatarLg').textContent = initials;
+  document.getElementById('profileName').textContent     = name;
+  document.getElementById('profileEmail').textContent    = email;
+  document.getElementById('profileJoined').textContent   = 'Member since ' + (session.joined || '—');
+  document.getElementById('piName').textContent          = name;
+  document.getElementById('piEmail').textContent         = email;
+  document.getElementById('piJoined').textContent        = session.joined || '—';
+
+  // Set min date for pickup
+  document.getElementById('pickupDate').min = new Date().toISOString().split('T')[0];
+
+  // ── Shipments storage ──
+  function getShipments() {
+    return JSON.parse(localStorage.getItem('moovit_shipments_' + email) || '[]');
+  }
+  function saveShipments(list) {
+    localStorage.setItem('moovit_shipments_' + email, JSON.stringify(list));
+  }
+
+  // ── Stats ──
+  function updateStats() {
+    const list = getShipments();
+    document.getElementById('statTotal').textContent     = list.length;
+    document.getElementById('statTransit').textContent   = list.filter(s => s.status === 'In Transit').length;
+    document.getElementById('statDelivered').textContent = list.filter(s => s.status === 'Delivered').length;
+    document.getElementById('statPending').textContent   = list.filter(s => s.status === 'Pending').length;
+    document.getElementById('piShipments').textContent   = list.length;
+  }
+
+  // ── Render table ──
+  function renderTable(containerId, list) {
+    const el = document.getElementById(containerId);
+    if (!list.length) {
+      el.innerHTML = `<div class="empty"><div class="empty-icon">📭</div><p>No shipments yet. Book your first one!</p></div>`;
+      return;
+    }
+    el.innerHTML = `
+      <table>
+        <thead><tr>
+          <th>Tracking ID</th><th>From</th><th>To</th>
+          <th>Cargo</th><th>Service</th><th>Date</th><th>Status</th>
+        </tr></thead>
+        <tbody>
+          ${list.map(s => `
+            <tr>
+              <td><strong>${s.id}</strong></td>
+              <td>${s.pickupCity}</td>
+              <td>${s.deliveryCity}</td>
+              <td>${s.cargoType}</td>
+              <td>${s.serviceType}</td>
+              <td>${s.pickupDate}</td>
+              <td><span class="badge badge-${s.status === 'In Transit' ? 'transit' : s.status === 'Delivered' ? 'delivered' : 'pending'}">${s.status}</span></td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>`;
+  }
+
+  function refreshTables() {
+    const list = getShipments();
+    renderTable('recentShipmentsTable', list.slice(-5).reverse());
+    renderTable('allShipmentsTable', [...list].reverse());
+    updateStats();
+  }
+
+  // ── Book shipment ──
+  function bookShipment(e) {
+    e.preventDefault();
+    const id = 'MV-' + Date.now().toString().slice(-6);
+    const statuses = ['Pending', 'In Transit'];
+    const shipment = {
+      id,
+      senderName:      document.getElementById('senderName').value,
+      senderPhone:     document.getElementById('senderPhone').value,
+      pickupCity:      document.getElementById('pickupCity').value,
+      pickupAddress:   document.getElementById('pickupAddress').value,
+      receiverName:    document.getElementById('receiverName').value,
+      receiverPhone:   document.getElementById('receiverPhone').value,
+      deliveryCity:    document.getElementById('deliveryCity').value,
+      deliveryAddress: document.getElementById('deliveryAddress').value,
+      cargoType:       document.getElementById('cargoType').value,
+      weight:          document.getElementById('weight').value + ' kg',
+      serviceType:     document.getElementById('serviceType').value,
+      pickupDate:      document.getElementById('pickupDate').value,
+      instructions:    document.getElementById('instructions').value,
+      status:          statuses[Math.floor(Math.random() * statuses.length)],
+      bookedOn:        new Date().toLocaleDateString()
+    };
+    const list = getShipments();
+    list.push(shipment);
+    saveShipments(list);
+    document.getElementById('bookForm').reset();
+    refreshTables();
+    showToast(`✅ Shipment ${id} booked successfully!`);
+    showTab('shipments');
+  }
+
+  // ── Tabs ──
+  function showTab(tab) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById('panel-' + tab)?.classList.add('active');
+    document.getElementById('tab-'   + tab)?.classList.add('active');
+    refreshTables();
+  }
+
+  // ── Toast ──
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3500);
+  }
+
+  // ── Logout ──
+  function logout() {
+    localStorage.removeItem('moovit_session');
+    window.location.href = 'login.html';
+  }
+
+  // ── Init ──
+  refreshTables();
+</script>
+</body>
+</html>

@@ -222,8 +222,17 @@
       } else {
         localStorage.removeItem('rememberedEmail');
       }
-      // If all validations pass, redirect
-      window.location.href = 'main.html';
+
+      // Save logged-in user session
+      const users = JSON.parse(localStorage.getItem('moovit_users') || '[]');
+      const user = users.find(u => u.email === email);
+      if (user) {
+        localStorage.setItem('moovit_session', JSON.stringify(user));
+      } else {
+        // Guest session
+        localStorage.setItem('moovit_session', JSON.stringify({ name: 'Guest', email }));
+      }
+      window.location.href = 'dashboard.html';
     });
 
     // simple placeholder for forgot password
